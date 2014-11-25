@@ -1,3 +1,4 @@
+#~~~Code to read in .csv and output most upvoted posts.
 #Apply multiplier
 from glob import glob
 from pandas import read_csv
@@ -69,3 +70,28 @@ with open("most_upvoted_posts_list.csv", "wb") as out_file:
         out_file.write("\n" + date + "," + str(most_upvoted_post[date]) + "," + str(most_upvoted_permalink[date]))
 
 print "Finally Done!"
+
+#~~~Code to output .csv to .png as graph
+%matplotlib inline
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use('fivethirtyeight')
+
+# Set some Pandas options
+pd.set_option('display.notebook_repr_html', False)
+
+reddit_data = pd.read_csv("most_upvoted_posts_list.csv", sep='\t', 
+                          skiprows=[0], names=["date", "Upvotes"])
+dates = [0, 366, 731, 1096, 1461, 1827, 2191]
+
+reddit_data.plot(figsize=(12,7), lw=1)
+plt.xticks(dates,
+          range(2008,2015))
+plt.yticks(np.arange(0, 1.8e6, 0.2e6), ["", ".2 M", ".4 M", ".6 M", ".8 M", 
+                                         "1 M", "1.2 M", "1.4 M", "1.6 M"])
+plt.ylabel("Total Upvotes")
+plt.title("Most Upvoted Posts Adjusted for Inflation, 2008-2013")
+plt.savefig("reddit-daily-adjusted-upvotes.png")
+;
+

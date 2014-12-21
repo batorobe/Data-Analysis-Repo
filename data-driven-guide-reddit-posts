@@ -34,7 +34,9 @@ with open("RS_2014-08J.json") as in_file:
             
             num_of_top_posts[convertTimeStamp(json_line["created_utc"])
                                .weekday(),convertTimeStamp(json_line["created_utc"]).hour] +=1
-            if(json_line['domain'] == 'imgur.com' or json_line['domain'] == 'i.imgur.com'):
+            if(json_line['domain'] == 'imgur.com' or 
+                json_line['domain'] == 'i.imgur.com' or
+                json_line['domain'] == 'm.imgur.com'):
                 imgur_domain +=1
             
             link_domain[json_line['domain']] +=1

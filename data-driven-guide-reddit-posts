@@ -1,0 +1,72 @@
+#Which subreddits have highest average score
+#Fraction of posts which are above the 100 score threshold
+import json
+from datetime import datetime
+from collections import defaultdict
+import string
+
+def convertTimeStamp(x):
+    if(x > 1000):
+        return datetime.fromtimestamp(x)
+    else:
+        return datetime.fromtimestamp(946684800)
+
+avg_score_per_hour = defaultdict(int)
+num_of_top_posts = defaultdict(int)
+link_domain = defaultdict(int)
+score_per_dom = defaultdict(int)
+pop_word_title = defaultdict(int)
+exclude = set(string.punctuation)
+
+imgur_domain = 0
+total_posts = 0
+not_top_post = 0
+top_post_counter = 0
+with open("RS_2014-08J.json") as in_file:
+    for a in in_file:
+        total_posts +=1
+        json_line = json.loads(a)
+        
+        if(json_line["score"] > 100):
+            top_post_counter +=1
+            avg_score_per_hour[convertTimeStamp(json_line["created_utc"])
+                               .weekday(),convertTimeStamp(json_line["created_utc"]).hour] += json_line["score"]
+            
+            num_of_top_posts[convertTimeStamp(json_line["created_utc"])
+                               .weekday(),convertTimeStamp(json_line["created_utc"]).hour] +=1
+            if(json_line['domain'] == 'imgur.com' or json_line['domain'] == 'i.imgur.com'):
+                imgur_domain +=1
+            
+            link_domain[json_line['domain']] +=1
+            
+            score_per_dom[json_line['domain']] += json_line["score"]
+            
+            s = json_line['title']
+            s = ''.join(ch for ch in s if ch not in exclude)
+            s = s.split(" ")
+            for w in s:
+                pop_word_title[w] +=1
+        else:
+            not_top_post +=1
+
+with open("avg_score_per_hour.csv", "wb") as out_file:
+    out_file.write("Date/Hour,Score")
+    for date in sorted(avg_score_per_hour.keys()):
+        out_file.write("\n" + str(date) + "," + str(avg_score_per_hour[date]))
+with open("num_of_top_posts.csv", "wb") as out_file:
+    out_file.write("Date,Number_of_Top_Posts")
+    for date in sorted(num_of_top_posts.keys()):
+        out_file.write("\n" + str(date) + "," + str(num_of_top_posts[date]))
+with open("link_domain.csv", "wb") as out_file:
+    out_file.write("Domain,Num_of_Occurrences")
+    for date in sorted(link_domain.keys()):
+        out_file.write("\n" + date.encode('utf-8') + "," + str(link_domain[date]))
+with open("score_per_dom.csv", "wb") as out_file:
+    out_file.write("Domain,Score")
+    for date in sorted(score_per_dom.keys()):
+        out_file.write("\n" + date.encode('utf-8') + "," + str(score_per_dom[date])) 
+with open("pop_word_title.csv", "wb") as out_file:
+    out_file.write("Title,Upvotes")
+    for date in sorted(pop_word_title.keys()):
+        out_file.write("\n" + date.encode('utf-8') + "," + str(pop_word_title[date])) 
+print "Done"
